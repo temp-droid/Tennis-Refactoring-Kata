@@ -1,97 +1,84 @@
 public class TennisGame2 implements TennisGame
 {
-    public int P1point = 0;
-    public int P2point = 0;
-
-    public String P1res = "";
-    public String P2res = "";
-    private String player1Name;
-    private String player2Name;
+    private final Player player1;
+    private final Player player2;
 
     public TennisGame2(String player1Name, String player2Name)
     {
-        this.player1Name = player1Name;
-        this.player2Name = player2Name;
+        this.player1 = new Player(player1Name);
+        this.player2 = new Player(player2Name);
     }
 
     public String getScore()
     {
-        if (P1point == P2point)
+        if (player1.score() == player2.score())
         {
-            switch (P1point)
-            {
-                case 0:
-                    return "Love-All";
-                case 1:
-                    return "Fifteen-All";
-                case 2:
-                    return "Thirty-All";
-                case 3:
-                case 4:
-                    return "Deuce";
-            }
+            return handleEquality();
         }
 
-        if (P1point >= 4)
+        if (player1.hasAdvantage(player2)) return "Advantage " + player1.name();
+        if (player2.hasAdvantage(player1)) return "Advantage " + player2.name();
+        if (player1.hasWon(player2)) return "Win for " + player1.name();
+        if (player2.hasWon(player1)) return "Win for " + player2.name();
+
+        return defaultScoreFormat();
+    }
+
+    private String handleEquality()
+    {
+        switch (player1.score())
         {
-            if (P1point - P2point == 1)
-                return "Advantage player1";
-            if (P1point - P2point >= 2)
-                return "Win for player1";
+            case 0:
+                return "Love-All";
+            case 1:
+                return "Fifteen-All";
+            case 2:
+                return "Thirty-All";
+            case 3:
+            case 4:
+                return "Deuce";
+            default:
+                throw new IllegalArgumentException("Unhandled equality score " + player1.score());
         }
+    }
 
-        if (P2point >= 4)
+    private String defaultScoreFormat()
+    {
+        return convert(player1.score()) + "-" + convert(player2.score());
+    }
+
+    private String convert(final int point)
+    {
+        switch (point)
         {
-            if (P2point - P1point == 1)
-                return "Advantage player2";
-            if (P2point - P1point >= 2)
-                return "Win for player2";
+            case 0:
+                return "Love";
+            case 1:
+                return "Fifteen";
+            case 2:
+                return "Thirty";
+            case 3:
+                return "Forty";
+            default:
+                throw new IllegalArgumentException("Cannot convert that point to string");
         }
-
-        String p1 = getP1Point();
-        String p2 = getP2Point();
-
-        return p1 + "-" + p2;
     }
 
-    private String getP1Point()
+    public void player1Scores()
     {
-        return getPoint(P1point);
+        player1.incrementScore();
     }
 
-    private String getP2Point()
+    public void player2Scores()
     {
-        return getPoint(P2point);
-    }
-
-    private String getPoint(final int p1point)
-    {
-        if (p1point == 0)
-            return "Love";
-        if (p1point == 1)
-            return "Fifteen";
-        if (p1point == 2)
-            return "Thirty";
-        if (p1point == 3)
-            return "Forty";
-        return null;
-    }
-
-    public void P1Score()
-    {
-        P1point++;
-    }
-
-    public void P2Score()
-    {
-        P2point++;
+        player2.incrementScore();
     }
 
     public void wonPoint(String player)
     {
         if (player.equals("player1"))
-            P1Score();
+            player1Scores();
         else
-            P2Score();
+            player2Scores();
     }
 }
