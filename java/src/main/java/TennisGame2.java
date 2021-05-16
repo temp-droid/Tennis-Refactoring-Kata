@@ -1,3 +1,5 @@
+import java.util.Optional;
+
 public class TennisGame2 implements TennisGame
 {
     private final Player player1;
@@ -12,16 +14,35 @@ public class TennisGame2 implements TennisGame
     public String getScore()
     {
         if (player1.score() == player2.score())
-        {
             return handleEquality();
-        }
 
-        if (player1.hasAdvantage(player2)) return "Advantage " + player1.name();
-        if (player2.hasAdvantage(player1)) return "Advantage " + player2.name();
-        if (player1.hasWon(player2)) return "Win for " + player1.name();
-        if (player2.hasWon(player1)) return "Win for " + player2.name();
+        Optional<Player> playerInAdvantage = playerInAdvantage();
+        if (playerInAdvantage.isPresent())
+            return "Advantage " + playerInAdvantage.get().name();
+
+        Optional<Player> winner = winner();
+        if (winner.isPresent())
+            return "Win for " + winner.get().name();
 
         return defaultScoreFormat();
+    }
+
+    private Optional<Player> winner()
+    {
+        if (player1.hasWon(player2))
+            return Optional.of(player1);
+        if (player2.hasWon(player1))
+            return Optional.of(player2);
+        return Optional.empty();
+    }
+
+    private Optional<Player> playerInAdvantage()
+    {
+        if (player1.hasAdvantage(player2))
+            return Optional.of(player1);
+        if (player2.hasAdvantage(player1))
+            return Optional.of(player2);
+        return Optional.empty();
     }
 
     private String handleEquality()
